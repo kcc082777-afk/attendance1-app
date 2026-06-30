@@ -1,606 +1,670 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="apple-mobile-web-app-title" content="出勤與成本"/>
-<title>工程出勤薪資與施工成本管理系統</title>
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,sans-serif;background:#f1f5f9;min-height:100vh}
-.header{background:#1e40af;color:#fff;padding:14px 16px;display:flex;align-items:center;justify-content:space-between}
-.header h1{font-size:17px;font-weight:700}
-.header .sub{font-size:11px;opacity:.8;margin-top:2px}
-.header .today{font-size:12px;opacity:.9}
-.tabs{display:flex;background:#fff;border-bottom:2px solid #e2e8f0;overflow-x:auto}
-.tab{flex:1;padding:11px 0;border:none;background:transparent;color:#64748b;font-weight:400;border-bottom:3px solid transparent;cursor:pointer;font-size:12px;white-space:nowrap;min-width:60px;text-align:center}
-.tab.active{background:#eff6ff;color:#1e40af;font-weight:700;border-bottom:3px solid #1e40af}
-.content{padding:14px}
-.card{background:#fff;border-radius:12px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin-bottom:12px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
-.emp-card{background:#fff;border-radius:12px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
-.emp-name{font-weight:700;font-size:15px}
-.emp-wage{font-size:12px;color:#94a3b8}
-.status-btn{border:none;border-radius:20px;padding:6px 16px;font-weight:700;font-size:13px;cursor:pointer;color:#fff}
-.bonus-row{display:flex;align-items:center;gap:8px;margin-top:10px}
-.bonus-row label{font-size:13px;color:#64748b;white-space:nowrap}
-.bonus-row input{flex:1;padding:5px 8px;border-radius:8px;border:1px solid #e2e8f0;font-size:14px}
-.hint{margin-top:6px;font-size:11px;color:#94a3b8}
-.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
-.stat-item{background:#f8fafc;border-radius:8px;padding:8px 10px}
-.stat-label{font-size:11px;color:#94a3b8;margin-bottom:2px}
-.stat-value{font-weight:700;font-size:14px;color:#1e293b}
-.total-box{background:#eff6ff;border-radius:10px;padding:10px 14px;text-align:center}
-.total-label{font-size:12px;color:#3b82f6;font-weight:600;margin-bottom:2px}
-.total-amount{font-size:22px;font-weight:800;color:#1e40af}
-.total-detail{font-size:11px;color:#93c5fd;margin-top:2px}
-.grand-total{background:#1e40af;color:#fff;border-radius:12px;padding:16px;margin-top:16px;text-align:center}
-.grand-total .label{font-size:14px;opacity:.85;margin-bottom:4px}
-.grand-total .amount{font-size:28px;font-weight:800}
-.period-bar{background:#fff;border-radius:12px;padding:12px;margin-bottom:14px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;box-shadow:0 1px 4px rgba(0,0,0,.06)}
-.period-bar label{font-size:14px;font-weight:600;color:#475569}
-select,input[type=date],input[type=number],input[type=text],textarea{padding:6px 10px;border-radius:8px;border:1px solid #cbd5e1;font-size:14px}
-.history-row{display:flex;align-items:center;padding:10px 14px;border-bottom:1px solid #f1f5f9;gap:12px}
-.history-date{font-size:13px;color:#475569;min-width:90px}
-.badge{border-radius:12px;padding:3px 12px;font-size:12px;font-weight:700;color:#fff;text-align:center;min-width:48px}
-.bonus-badge{font-size:12px;color:#8b5cf6;font-weight:600}
-.project-card{background:#fff;border-radius:12px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin-bottom:12px}
-.project-title{font-weight:700;font-size:16px;color:#1e293b;margin-bottom:6px}
-.project-desc{font-size:13px;color:#64748b;margin-bottom:8px}
-.member-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
-.member-tag{background:#eff6ff;color:#1e40af;border-radius:12px;padding:2px 10px;font-size:12px;font-weight:600}
-.photo-grid{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
-.photo-grid img{width:90px;height:90px;object-fit:cover;border-radius:8px;border:1px solid #e2e8f0}
-.btn{border:none;border-radius:8px;padding:8px 16px;cursor:pointer;font-weight:600;font-size:13px}
-.btn-primary{background:#1e40af;color:#fff}
-.btn-secondary{background:#e2e8f0;color:#475569}
-.btn-danger{background:#ef4444;color:#fff}
-.btn-add{background:#1e40af;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-weight:700;font-size:13px;cursor:pointer}
-.form-group{margin-bottom:12px}
-.form-group label{display:block;font-size:13px;font-weight:600;color:#475569;margin-bottom:5px}
-.form-group input,.form-group textarea{width:100%}
-.member-select-btn{padding:5px 12px;border-radius:20px;font-size:13px;cursor:pointer;border:none;font-weight:600}
-.empty{text-align:center;color:#94a3b8;padding:40px;font-size:15px}
-.btn-row{display:flex;gap:8px;margin-top:12px}
-.btn-row .btn{flex:1;padding:8px 0;text-align:center}
-.date-row{margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.date-row label{font-size:14px;color:#475569;font-weight:600}
-.top-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px}
-.photo-upload-btn{background:#f1f5f9;border:1px dashed #94a3b8;border-radius:8px;padding:8px 16px;cursor:pointer;font-size:13px;color:#64748b}
-.new-photo-wrap{position:relative;display:inline-block}
-.new-photo-wrap img{width:70px;height:70px;object-fit:cover;border-radius:8px;border:1px solid #e2e8f0}
-.del-photo{position:absolute;top:-6px;right:-6px;background:#ef4444;color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.new-photos{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>工程出勤薪資與施工成本管理系統</title>
+    <style>
+        :root {
+            --primary-color: #007aff;
+            --success-color: #34c759;
+            --danger-color: #ff3b30;
+            --warning-color: #ff9500;
+            --bg-color: #f2f2f7;
+            --card-bg: #ffffff;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 12px;
+            color: #1c1c1e;
+            box-sizing: border-box;
+        }
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+            padding-bottom: 40px;
+        }
+        .header {
+            text-align: center;
+            padding: 16px 0;
+        }
+        .header h1 {
+            font-size: 22px;
+            margin: 0;
+            color: #000;
+        }
+        .nav-tabs {
+            display: flex;
+            background: #e3e3e9;
+            border-radius: 8px;
+            padding: 2px;
+            margin-bottom: 16px;
+        }
+        .tab-btn {
+            flex: 1;
+            border: none;
+            background: none;
+            padding: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .tab-btn.active {
+            background: #fff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+            width: 100%;
+        }
+        .card h2 {
+            font-size: 16px;
+            margin-top: 0;
+            margin-bottom: 12px;
+            border-left: 4px solid var(--primary-color);
+            padding-left: 8px;
+        }
+        .form-group {
+            margin-bottom: 12px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            margin-bottom: 4px;
+            color: #8e8e93;
+        }
+        .form-control, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #c7c7cc;
+            border-radius: 8px;
+            font-size: 15px;
+            box-sizing: border-box;
+            background-color: #fff;
+            -webkit-appearance: none;
+        }
+        .form-control:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        .btn {
+            background: var(--primary-color);
+            color: #fff;
+            border: none;
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            box-sizing: border-box;
+        }
+        .btn:active {
+            opacity: 0.8;
+        }
+        .btn-success { background: var(--success-color); }
+        .btn-danger { background: var(--danger-color); }
+        
+        .attendance-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .status-options {
+            display: flex;
+            gap: 4px;
+        }
+        .status-btn {
+            border: 1px solid #c7c7cc;
+            background: #fff;
+            padding: 6px 10px;
+            font-size: 12px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .status-btn.active[data-status="出勤"] { background: var(--success-color); color: #fff; border-color: var(--success-color); }
+        .status-btn.active[data-status="半天"] { background: var(--warning-color); color: #fff; border-color: var(--warning-color); }
+        .status-btn.active[data-status="請假"] { background: #8e8e93; color: #fff; border-color: #8e8e93; }
+        .status-btn.active[data-status="缺勤"] { background: var(--danger-color); color: #fff; border-color: var(--danger-color); }
 
-/* 成本專用樣式 */
-.cost-box {background:#fff7ed;border:1px dashed #fed7aa;border-radius:8px;padding:10px;margin-top:10px}
-.cost-title {font-size:13px;font-weight:700;color:#c2410c;margin-bottom:6px}
-.cost-item-detail {font-size:12px;color:#7c2d12;display:flex;justify-content:space-between;margin-bottom:2px}
-.cost-total-row {border-top:1px solid #fed7aa;padding-top:4px;margin-top:4px;font-weight:700;color:#9a3412;display:flex;justify-content:space-between}
-.dynamic-row {display:flex;gap:6px;margin-bottom:6px}
-.dynamic-row input[type=text] {flex:2}
-.dynamic-row input[type=number] {flex:1}
-</style>
+        .chart-container {
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .chart-bar-wrapper {
+            margin-bottom: 12px;
+        }
+        .chart-label {
+            font-size: 13px;
+            margin-bottom: 4px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .chart-bar-bg {
+            background: #e5e5ea;
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            width: 100%;
+        }
+        .chart-bar-fill {
+            background: var(--primary-color);
+            height: 100%;
+            width: 0%;
+            transition: width 0.6s ease;
+        }
+        .chart-bar-fill.cost { background: var(--danger-color); }
+        
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            font-size: 14px;
+            border-bottom: 1px solid #eee;
+        }
+        .action-btns {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+        .btn-action {
+            background: none;
+            padding: 4px 8px;
+            font-size: 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            box-sizing: border-box;
+        }
+        .btn-edit {
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+        .btn-edit:active {
+            background: var(--primary-color);
+            color: #fff;
+        }
+        .btn-delete-item {
+            border: 1px solid var(--danger-color);
+            color: var(--danger-color);
+        }
+        .btn-delete-item:active {
+            background: var(--danger-color);
+            color: #fff;
+        }
+        .hidden { display: none !important; }
+    </style>
 </head>
 <body>
-<div id="app"></div>
-<script>
-const EMPLOYEES_KEY='att_employees';
-const RECORDS_KEY='att_records';
-const PROJECTS_KEY='att_projects';
-const MACHINES_KEY='att_machines';
 
-const DEFAULT_EMP=[
-  {id:1,name:'員工A',dailyWage:1200},
-  {id:2,name:'員工B',dailyWage:1500},
-  {id:3,name:'員工C',dailyWage:1300},
-  {id:4,name:'員工D',dailyWage:1100},
-  {id:5,name:'員工E',dailyWage:1400},
-];
-
-const DEFAULT_MACHINES=[
-  {id:1,name:'怪手 (挖土機)',dailyCost:5000},
-  {id:2,name:'山貓 (小型裝載機)',dailyCost:3500},
-  {id:3,name:'發電機',dailyCost:800},
-];
-
-const STATUS_ORDER=['none','present','half','leave','absent'];
-const STATUS_LABEL={none:'未記錄',present:'出勤',half:'半天',leave:'請假',absent:'缺勤'};
-const STATUS_COLOR={none:'#94a3b8',present:'#22c55e',half:'#06b6d4',leave:'#f59e0b',absent:'#ef4444'};
-
-let employees=JSON.parse(localStorage.getItem(EMPLOYEES_KEY)||'null')||DEFAULT_EMP;
-let machines=JSON.parse(localStorage.getItem(MACHINES_KEY)||'null')||DEFAULT_MACHINES;
-let records=JSON.parse(localStorage.getItem(RECORDS_KEY)||'{}');
-let projects=JSON.parse(localStorage.getItem(PROJECTS_KEY)||'{}');
-
-function save(){
-  localStorage.setItem(EMPLOYEES_KEY,JSON.stringify(employees));
-  localStorage.setItem(MACHINES_KEY,JSON.stringify(machines));
-  localStorage.setItem(RECORDS_KEY,JSON.stringify(records));
-  localStorage.setItem(PROJECTS_KEY,JSON.stringify(projects));
-}
-
-function today(){return new Date().toISOString().slice(0,10)}
-function fmtDate(s){if(!s)return'';const[y,m,d]=s.split('-');return`${y}年${m}月${d}日`}
-function getDays(y,m){return new Date(y,m,0).getDate()}
-function periodDates(y,m,h){
-  const s=h===1?1:16,e=h===1?15:getDays(y,m);
-  const r=[];
-  for(let d=s; d<=e; d++)r.push(`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`);
-  return r;
-}
-function nowPeriod(){
-  const n=new Date(),d=n.getDate();
-  return{year:n.getFullYear(),month:n.getMonth()+1,half:d<=15?1:2};
-}
-function getRecord(date,eid){return(records[date]&&records[date][eid])||{status:'none',bonus:0}}
-function setRecord(date,eid,field,val){
-  if(!records[date])records[date]={};
-  if(!records[date][eid])records[date][eid]={status:'none',bonus:0};
-  records[date][eid][field]=val;save();
-}
-
-function getEmpWageOnDay(date,eid){
-  const emp=employees.find(e=>e.id===eid);
-  if(!emp)return 0;
-  const rec=getRecord(date,eid);
-  let multi=0;
-  if(rec.status==='present')multi=1;
-  else if(rec.status==='half')multi=0.5;
-  return (emp.dailyWage * multi) + Number(rec.bonus||0);
-}
-
-let state={
-  tab:'attendance',
-  selectedDate:today(),
-  period:nowPeriod(),
-  historyEmp:null,
-  historyMonth:{year:new Date().getFullYear(),month:new Date().getMonth()+1},
-  editEmp:null,
-  editMach:null,
-  showAddProject:false,
-  viewProject:null,
-  newProject:{name:'',desc:'',members:[],machines:[],materials:[]}, 
-};
-
-function setState(patch){Object.assign(state,patch);render()}
-
-function render(){
-  const app=document.getElementById('app');
-  const per=state.period;
-  const perLabel=`${per.year}年${per.month}月 ${per.half===1?'上半月 (1~15日)':'下半月 (16~月底)'}`;
-  app.innerHTML=`
-  <div class="header">
-    <div><div class="header h1">📋 工程出勤與成本系統</div><div class="sub">${perLabel}</div></div>
-    <div class="today">今日：${today()}</div>
-  </div>
-  <div class="tabs">
-    ${[['attendance','📅 出勤點名'],['site','🏗️ 施工成本'],['report','📊 薪資結算'],['history','📁 個人歷史'],['settings','⚙️ 後台設定']].map(([k,l])=>`<button class="tab${state.tab===k?' active':''}">${l}</button>`).join('')}
-  </div>
-  <div class="content" id="tab-content"></div>`;
-  
-  app.querySelectorAll('.tab').forEach((btn,i)=>{
-    const keys=['attendance','site','report','history','settings'];
-    btn.onclick=()=>setState({tab:keys[i]});
-  });
-  const tc=document.getElementById('tab-content');
-  if(state.tab==='attendance')renderAttendance(tc);
-  else if(state.tab==='site')renderSite(tc);
-  else if(state.tab==='report')renderReport(tc);
-  else if(state.tab==='history')renderHistory(tc);
-  else if(state.tab==='settings')renderSettings(tc);
-}
-
-function renderAttendance(tc){
-  tc.innerHTML=`
-  <div class="date-row">
-    <label>選擇日期：</label>
-    <input type="date" id="sel-date" value="${state.selectedDate}"/>
-  </div>
-  <div class="grid" id="emp-grid"></div>`;
-  document.getElementById('sel-date').onchange=e=>setState({selectedDate:e.target.value});
-  const grid=document.getElementById('emp-grid');
-  employees.forEach(emp=>{
-    const rec=getRecord(state.selectedDate,emp.id);
-    const st=rec.status||'none';
-    const color=STATUS_COLOR[st];
-    const div=document.createElement('div');
-    div.className='emp-card';
-    div.style.borderLeft=`5px solid ${color}`;
-    div.innerHTML=`
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-        <div><div class="emp-name">${emp.name}</div><div class="emp-wage">日薪 NT$ ${emp.dailyWage.toLocaleString()}</div></div>
-        <button class="status-btn" style="background:${color}">${STATUS_LABEL[st]}</button>
-      </div>
-      <div class="bonus-row">
-        <label>加給 NT$</label>
-        <input type="number" min="0" value="${rec.bonus||''}" placeholder="0" class="bonus-input"/>
-      </div>`;
-    div.querySelector('.status-btn').onclick=()=>{
-      const cur=getRecord(state.selectedDate,emp.id).status||'none';
-      const idx=STATUS_ORDER.indexOf(cur);
-      const next=STATUS_ORDER[(idx+1)%STATUS_ORDER.length];
-      setRecord(state.selectedDate,emp.id,'status',next);render();
-    };
-    div.querySelector('.bonus-input').onchange=e=> {
-      setRecord(state.selectedDate,emp.id,'bonus',Number(e.target.value));
-    };
-    grid.appendChild(div);
-  });
-}
-
-function renderSite(tc){
-  const dayProjects=projects[state.selectedDate]||[];
-  tc.innerHTML=`
-  <div class="top-row">
-    <div class="date-row" style="margin:0">
-      <label>施工日期：</label>
-      <input type="date" id="site-date" value="${state.selectedDate}"/>
+<div class="app-container">
+    <div class="header">
+        <h1>🏗️ 工程維護營運管理系統</h1>
     </div>
-    <button class="btn-add" id="add-proj-btn">＋ 新增施工項目</button>
-  </div>
-  <div id="add-proj-form"></div>
-  <div id="proj-list"></div>`;
-  
-  document.getElementById('site-date').onchange=e=>setState({selectedDate:e.target.value});
-  document.getElementById('add-proj-btn').onclick=()=>setState({showAddProject:true});
-  
-  if(state.showAddProject){
-    const formDiv=document.getElementById('add-proj-form');
-    formDiv.innerHTML=`
-    <div class="card" style="background:#f8fafc;border:1px solid #cbd5e1">
-      <div style="font-weight:700;font-size:15px;margin-bottom:12px;color:#1e40af">🏗️ 新增施工項目 — ${fmtDate(state.selectedDate)}</div>
-      <div class="form-group"><label>施工項目名稱*</label><input type="text" id="proj-name" value="${state.newProject.name}" placeholder="如：A棟地基灌漿"/></div>
-      <div class="form-group"><label>工作敘述</label><textarea id="proj-desc" rows="2" placeholder="備註說明">${state.newProject.desc}</textarea></div>
-      
-      <div class="form-group">
-        <label>1. 派遣施工人員 (費用連動當日出勤薪資)：</label>
-        <div style="display:flex;flex-wrap:wrap;gap:6px">
-          ${employees.map(e=>{
-            const isSel=state.newProject.members.includes(e.id);
-            const todayCost=getEmpWageOnDay(state.selectedDate,e.id);
-            return `<button class="member-select-btn" data-type="emp" data-id="${e.id}" style="background:${isSel?'#1e40af':'#e2e8f0'};color:${isSel?'#fff':'#475569'}">${e.name} (今日:$${todayCost})</button>`;
-          }).join('')}
-        </div>
-      </div>
 
-      <div class="form-group">
-        <label>2. 使用機械項目 (自訂機械進場成本)：</label>
-        <div style="display:flex;flex-wrap:wrap;gap:6px">
-          ${machines.map(m=>{
-            const isSel=state.newProject.machines.includes(m.id);
-            return `<button class="member-select-btn" data-type="mach" data-id="${m.id}" style="background:${isSel?'#ea580c':'#e2e8f0'};color:${isSel?'#fff':'#475569'}">${m.name} ($${m.dailyCost})</button>`;
-          }).join('')}
-        </div>
-      </div>
+    <div class="nav-tabs">
+        <button class="tab-btn active" onclick="switchTab('attendance')">出勤點名</button>
+        <button class="tab-btn" onclick="switchTab('cost')">施工成本</button>
+        <button class="tab-btn" onclick="switchTab('salary')">薪資結算</button>
+        <button class="tab-btn" onclick="switchTab('admin')">後台設定</button>
+    </div>
 
-      <div class="form-group">
-        <label>3. 消耗材料費用憑證：</label>
-        <div id="material-rows">
-          ${state.newProject.materials.map((mat,idx)=>`
-            <div class="dynamic-row">
-              <input type="text" placeholder="材料/耗材名稱" value="${mat.name}" data-idx="${idx}" class="mat-name"/>
-              <input type="number" placeholder="金額" value="${mat.cost||''}" data-idx="${idx}" class="mat-cost"/>
-              <button class="btn btn-secondary del-mat-btn" data-idx="${idx}" style="padding:4px 10px">✕</button>
+    <div id="tab-attendance" class="tab-content">
+        <div class="card">
+            <h2>📅 今日出勤點名</h2>
+            <div class="form-group">
+                <label>選擇日期</label>
+                <input type="date" id="attendance-date" class="form-control">
             </div>
-          `).join('')}
+            <div id="attendance-list"></div>
+            <button class="btn btn-success" style="margin-top: 16px;" onclick="saveAttendance()">儲存今日出勤</button>
         </div>
-        <button class="btn btn-secondary" id="add-mat-btn" style="padding:4px 10px;font-size:12px;margin-top:4px">＋ 增加耗材項目</button>
-      </div>
+    </div>
 
-      <div class="btn-row">
-        <button class="btn btn-primary" id="save-proj">儲存項目</button>
-        <button class="btn btn-secondary" id="cancel-proj">取消</button>
-      </div>
-    </div>`;
+    <div id="tab-cost" class="tab-content hidden">
+        <div class="card">
+            <h2>🏗️ 機具與材料成本登記</h2>
+            <div class="form-group">
+                <label>日期</label>
+                <input type="date" id="cost-date" class="form-control" onchange="renderCostDetails()">
+            </div>
+            <div class="form-group">
+                <label>項目類別</label>
+                <select id="cost-type" class="form-control" onchange="toggleCostFields()">
+                    <option value="machinery">機械機具租金/油料</option>
+                    <option value="material">材料費用/憑證發票</option>
+                </select>
+            </div>
+            
+            <div id="machinery-fields">
+                <div class="form-group">
+                    <label>機具名稱（如：怪手、山貓、發電機）</label>
+                    <input type="text" id="machinery-name" class="form-control" placeholder="請輸入機具名稱">
+                </div>
+                <div class="form-group">
+                    <label>今日租金/油資費用 (元)</label>
+                    <input type="number" inputmode="decimal" id="machinery-amount" class="form-control" placeholder="0">
+                </div>
+            </div>
 
-    document.getElementById('proj-name').oninput=e=>state.newProject.name=e.target.value;
-    document.getElementById('proj-desc').oninput=e=>state.newProject.desc=e.target.value;
-    
-    document.querySelectorAll('.member-select-btn').forEach(btn=>{
-      btn.onclick=()=>{
-        const id=parseInt(btn.dataset.id);
-        if(btn.dataset.type==='emp'){
-          const m=state.newProject.members;
-          state.newProject.members=m.includes(id)?m.filter(x=>x!==id):[...m,id];
-        }else{
-          const mac=state.newProject.machines;
-          state.newProject.machines=mac.includes(id)?mac.filter(x=>x!==id):[...mac,id];
+            <div id="material-fields" class="hidden">
+                <div class="form-group">
+                    <label>材料品名/發票項目</label>
+                    <input type="text" id="material-name" class="form-control" placeholder="請輸入材料品名">
+                </div>
+                <div class="form-group">
+                    <label>發票/收據金額 (元)</label>
+                    <input type="number" inputmode="decimal" id="material-amount" class="form-control" placeholder="0">
+                </div>
+            </div>
+
+            <button class="btn" onclick="saveCostItem()">登記成本項目</button>
+        </div>
+
+        <div class="card">
+            <h2>📋 當日已登記成本明細</h2>
+            <div id="daily-cost-detail-list"></div>
+        </div>
+    </div>
+
+    <div id="tab-salary" class="tab-content hidden">
+        <div class="card">
+            <h2>📊 區間薪資與成本統計</h2>
+            <div class="form-group" style="display: flex; gap: 8px;">
+                <div style="flex: 1;">
+                    <label>開始日期</label>
+                    <input type="date" id="report-start" class="form-control">
+                </div>
+                <div style="flex: 1;">
+                    <label>結束日期</label>
+                    <input type="date" id="report-end" class="form-control">
+                </div>
+            </div>
+            <button class="btn" onclick="generateReport()">生成結算報表</button>
+        </div>
+
+        <div class="card">
+            <h2>📈 本期開支佔比</h2>
+            <div class="chart-container">
+                <div class="chart-bar-wrapper">
+                    <div class="chart-label"><span id="lbl-total-salary-name">員工薪資總計</span><span id="lbl-total-salary">NT$ 0</span></div>
+                    <div class="chart-bar-bg"><div id="bar-salary" class="chart-bar-fill"></div></div>
+                </div>
+                <div class="chart-bar-wrapper">
+                    <div class="chart-label"><span>機械機具開支</span><span id="lbl-total-machinery">NT$ 0</span></div>
+                    <div class="chart-bar-bg"><div id="bar-machinery" class="chart-bar-fill cost"></div></div>
+                </div>
+                <div class="chart-bar-wrapper">
+                    <div class="chart-label"><span>材料採購成本</span><span id="lbl-total-material">NT$ 0</span></div>
+                    <div class="chart-bar-bg"><div id="bar-material" class="chart-bar-fill cost"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📋 員工薪資發放明細</h2>
+            <div id="salary-detail-list">
+                <p style="color: #8e8e93; font-size: 14px; text-align: center;">請選擇日期區間並點擊生成報表</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-admin" class="tab-content hidden">
+        <div class="card">
+            <h2>👥 員工名冊管理</h2>
+            <div class="form-group">
+                <label>員工姓名</label>
+                <input type="text" id="new-worker-name" class="form-control" placeholder="請輸入姓名">
+            </div>
+            <div class="form-group">
+                <label>預設日薪 (元)</label>
+                <input type="number" inputmode="decimal" id="new-worker-wage" class="form-control" placeholder="例如：3000">
+            </div>
+            <button class="btn btn-success" onclick="addWorker()">新增員工</button>
+            <div style="margin-top: 16px;" id="admin-worker-list"></div>
+        </div>
+        
+        <div class="card">
+            <h2>⚠️ 系統維護</h2>
+            <p style="font-size: 13px; color: #8e8e93;">如果需要清空手機內的所有點名與成本歷史紀錄，請點擊下方按鈕（不可復原）。</p>
+            <button class="btn btn-danger" onclick="clearAllData()">清除本機所有歷史資料</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const defaultWorkers = [
+        { id: 1, name: "張辛苦", dailyWage: 3000 },
+        { id: 2, name: "李勞動", dailyWage: 3200 },
+        { id: 3, name: "王工程", dailyWage: 3500 }
+    ];
+
+    let workers = JSON.parse(localStorage.getItem('proj_workers')) || defaultWorkers;
+    let attendanceRecords = JSON.parse(localStorage.getItem('proj_attendance')) || {};
+    let machineryRecords = JSON.parse(localStorage.getItem('proj_machinery')) || [];
+    let materialRecords = JSON.parse(localStorage.getItem('proj_materials')) || [];
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('attendance-date').value = today;
+        document.getElementById('cost-date').value = today;
+        document.getElementById('report-start').value = today.substring(0, 8) + "01";
+        document.getElementById('report-end').value = today;
+
+        renderAttendanceList();
+        renderAdminWorkerList();
+        renderCostDetails();
+    });
+
+    function switchTab(tabName) {
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.add('hidden'));
+        event.currentTarget.classList.add('active');
+        document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+        
+        if(tabName === 'cost') {
+            renderCostDetails();
         }
-        renderSite(tc);
-      };
-    });
-
-    document.getElementById('add-mat-btn').onclick=()=>{
-      state.newProject.materials.push({name:'',cost:0});
-      renderSite(tc);
-    };
-
-    document.querySelectorAll('.mat-name').forEach(input=>{
-      input.oninput=e=>{state.newProject.materials[e.target.dataset.idx].name=e.target.value};
-    });
-    document.querySelectorAll('.mat-cost').forEach(input=>{
-      input.oninput=e=>{state.newProject.materials[e.target.dataset.idx].cost=Number(e.target.value)||0};
-    });
-    document.querySelectorAll('.del-mat-btn').forEach(btn=>{
-      btn.onclick=()=>{
-        state.newProject.materials.splice(parseInt(btn.dataset.idx),1);
-        renderSite(tc);
-      };
-    });
-
-    document.getElementById('save-proj').onclick=()=>{
-      const name=document.getElementById('proj-name').value.trim();
-      if(!name)return alert('請輸入施工項目名稱');
-      if(!projects[state.selectedDate])projects[state.selectedDate]=[];
-      projects[state.selectedDate].push({
-        id:Date.now(),
-        name,
-        desc:document.getElementById('proj-desc').value,
-        members:[...state.newProject.members],
-        machines:[...state.newProject.machines],
-        materials:state.newProject.materials.filter(m=>m.name.trim()!=='').map(m=>({...m}))
-      });
-      save();
-      setState({showAddProject:false,newProject:{name:'',desc:'',members:[],machines:[],materials:[]}});
-    };
-    document.getElementById('cancel-proj').onclick=()=>setState({showAddProject:false,newProject:{name:'',desc:'',members:[],machines:[],materials:[]}});
-  }
-
-  const listDiv=document.getElementById('proj-list');
-  if(dayProjects.length===0&&!state.showAddProject){listDiv.innerHTML='<div class="empty">本日尚無施工與成本紀錄</div>';return;}
-  
-  dayProjects.forEach((proj,pIdx)=>{
-    const div=document.createElement('div');div.className='project-card';
-    
-    let empTotal=0, machTotal=0, matTotal=0;
-    
-    const empDetails=proj.members.map(id=>{
-      const e=employees.find(x=>x.id===id);
-      const cost=getEmpWageOnDay(state.selectedDate,id);
-      empTotal+=cost;
-      return e?`<div class="cost-item-detail"><span>▪️ ${e.name} (人員)</span><span>$${cost.toLocaleString()}</span></div>`:''
-    }).join('');
-
-    const machDetails=proj.machines.map(id=>{
-      const m=machines.find(x=>x.id===id);
-      if(m){machTotal+=m.dailyCost;}
-      return m?`<div class="cost-item-detail"><span>▪️ ${m.name} (機械)</span><span>$${m.dailyCost.toLocaleString()}</span></div>`:''
-    }).join('');
-
-    // ✨ 修正點：在這裡將每筆耗材的名稱與金額印到畫面上
-    const matDetails=(proj.materials||[]).map(m=>{
-      matTotal+=m.cost;
-      return `<div class="cost-item-detail"><span>▪️ ${m.name} (耗材)</span><span>$${m.cost.toLocaleString()}</span></div>`
-    }).join('');
-
-    const grandCost = empTotal + machTotal + matTotal;
-
-    div.innerHTML=`
-      <div style="display:flex;justify-content:space-between;align-items:flex-start">
-        <div class="project-title">🏗️ ${proj.name}</div>
-        <button class="btn btn-danger" style="padding:2px 8px;font-size:11px" id="del-proj-${proj.id}">刪除</button>
-      </div>
-      ${proj.desc?`<div class="project-desc">${proj.desc}</div>`:''}
-      
-      <div class="cost-box">
-        <div class="cost-title">📊 當日成本計算清單</div>
-        ${empDetails||machDetails||matDetails?`
-          ${empDetails}
-          ${machDetails}
-          ${matDetails}
-        `:'<div class="cost-item-detail" style="color:#94a3b8">無選擇任何計費項目</div>'}
-        <div class="cost-total-row">
-          <span>💰 項目合計成本</span>
-          <span>NT$ ${grandCost.toLocaleString()}</span>
-        </div>
-      </div>`;
-      
-    div.querySelector(`#del-proj-${proj.id}`).onclick=()=>{
-      if(confirm('確定要刪除此施工與成本項目嗎？')){
-        projects[state.selectedDate].splice(pIdx,1);save();render();
-      }
-    };
-    listDiv.appendChild(div);
-  });
-}
-
-function renderReport(tc){
-  const p=state.period;
-  tc.innerHTML=`
-  <div class="period-bar">
-    <label>薪資結算期間：</label>
-    <select id="p-year">${[2025,2026,2027].map(y=>`<option${y===p.year?' selected':''}>${y}年</option>`).join('')}</select>
-    <select id="p-month">${Array.from({length:12},(_,i)=>i+1).map(m=>`<option value="${m}"${m===p.month?' selected':''}>${m}月</option>`).join('')}</select>
-    <select id="p-half"><option value="1"${p.half===1?' selected':''}>上半月</option><option value="2"${p.half===2?' selected':''}>下半月</option></select>
-  </div>
-  <div class="grid" id="rep-grid"></div>
-  <div class="grand-total"><div class="label">本期總薪資支出金額</div><div class="amount" id="grand-amt"></div></div>`;
-  
-  document.getElementById('p-year').onchange=e=>setState({period:{...state.period,year:parseInt(e.target.value)}});
-  document.getElementById('p-month').onchange=e=>setState({period:{...state.period,month:parseInt(e.target.value)}});
-  document.getElementById('p-half').onchange=e=>setState({period:{...state.period,half:parseInt(e.target.value)}});
-  
-  const dates=periodDates(p.year,p.month,p.half);
-  const grid=document.getElementById('rep-grid');
-  let grand=0;
-  
-  employees.forEach(emp=>{
-    let present=0, leave=0, absent=0, bonus=0, wage=0;
-    dates.forEach(d=>{
-      const r=getRecord(d,emp.id);
-      if(r.status==='present')present++;
-      else if(r.status==='half')present+=0.5;
-      else if(r.status==='leave')leave++;
-      else if(r.status==='absent')absent++;
-      bonus+=Number(r.bonus||0);
-      wage+=getEmpWageOnDay(d,emp.id);
-    });
-    grand+=wage;
-    
-    const div=document.createElement('div');div.className='card';
-    div.innerHTML=`
-      <div style="font-weight:700;font-size:15px;margin-bottom:10px">${emp.name}</div>
-      <div class="stat-grid">
-        <div class="stat-item" style="border-left:3px solid #22c55e"><div class="stat-label">出勤</div><div class="stat-value">${present} 天</div></div>
-        <div class="stat-item" style="border-left:3px solid #f59e0b"><div class="stat-label">請假</div><div class="stat-value">${leave} 天</div></div>
-        <div class="stat-item" style="border-left:3px solid #ef4444"><div class="stat-label">缺勤</div><div class="stat-value">${absent} 天</div></div>
-        <div class="stat-item" style="border-left:3px solid #8b5cf6"><div class="stat-label">加給</div><div class="stat-value">NT$ ${bonus.toLocaleString()}</div></div>
-      </div>
-      <div class="total-box">
-        <div class="total-label">應付薪資</div>
-        <div class="total-amount">NT$ ${wage.toLocaleString()}</div>
-      </div>`;
-    grid.appendChild(div);
-  });
-  document.getElementById('grand-amt').textContent=`NT$ ${grand.toLocaleString()}`;
-}
-
-function renderHistory(tc){
-  const h=state.historyMonth;
-  tc.innerHTML=`
-  <div class="period-bar">
-    <label>員工歷程：</label>
-    <select id="h-emp"><option value="">-- 請選擇人員 --</option>${employees.map(e=>`<option value="${e.id}"${state.historyEmp===e.id?' selected':''}>${e.name}</option>`).join('')}</select>
-    <select id="h-year">${[2025,2026,2027].map(y=>`<option${y===h.year?' selected':''}>${y}年</option>`).join('')}</select>
-    <select id="h-month">${Array.from({length:12},(_,i)=>i+1).map(m=>`<option value="${m}"${m===h.month?' selected':''}>${m}月</option>`).join('')}</select>
-  </div>
-  <div id="history-body"></div>`;
-  
-  document.getElementById('h-emp').onchange=e=>setState({historyEmp:parseInt(e.target.value)||null});
-  document.getElementById('h-year').onchange=e=>setState({historyMonth:{...state.historyMonth,year:parseInt(e.target.value)}});
-  document.getElementById('h-month').onchange=e=>setState({historyMonth:{...state.historyMonth,month:parseInt(e.target.value)}});
-  
-  const body=document.getElementById('history-body');
-  if(!state.historyEmp){body.innerHTML='<div class="empty">請選擇員工查看個人出勤歷史</div>';return;}
-  
-  const emp=employees.find(e=>e.id===state.historyEmp);
-  const days=getDays(h.year,h.month);
-  const dates=Array.from({length:days},(_,i)=>`${h.year}-${String(h.month).padStart(2,'0')}-${String(i+1).padStart(2,'0')}`);
-  let tp=0,tl=0,ta=0,tb=0,tw=0;
-  let rows='';
-  
-  dates.forEach(date=>{
-    const r=getRecord(date,state.historyEmp);
-    const st=r.status||'none';
-    if(st==='present')tp++;else if(st==='half')tp+=0.5;else if(st==='leave')tl++;else if(st==='absent')ta++;
-    tb+=Number(r.bonus||0);
-    tw+=getEmpWageOnDay(date,state.historyEmp);
-    
-    rows+=`<div class="history-row">
-      <div class="history-date">${fmtDate(date)}</div>
-      <div class="badge" style="background:${STATUS_COLOR[st]}">${STATUS_LABEL[st]}</div>
-      ${r.bonus>0?`<div class="bonus-badge">加給 +$${Number(r.bonus).toLocaleString()}</div>`:''}
-    </div>`;
-  });
-  
-  body.innerHTML=`
-    <div style="font-weight:700;font-size:16px;margin-bottom:10px">${emp.name} — ${h.year}年${h.month}月總覽</div>
-    <div class="card" style="padding:0;overflow:hidden">${rows}</div>
-    <div class="card" style="margin-top:12px">
-      <div class="stat-grid">
-        <div class="stat-item" style="border-left:3px solid #22c55e"><div class="stat-label">出勤天數</div><div class="stat-value">${tp} 天</div></div>
-        <div class="stat-item" style="border-left:3px solid #f59e0b"><div class="stat-label">請假天數</div><div class="stat-value">${tl} 天</div></div>
-        <div class="stat-item" style="border-left:3px solid #ef4444"><div class="stat-label">缺勤天數</div><div class="stat-value">${ta} 天</div></div>
-        <div class="stat-item" style="border-left:3px solid #8b5cf6"><div class="stat-label">加給合計</div><div class="stat-value">NT$ ${tb.toLocaleString()}</div></div>
-      </div>
-      <div class="total-box"><div class="total-label">全月薪資總計</div><div class="total-amount">NT$ ${tw.toLocaleString()}</div></div>
-    </div>`;
-}
-
-function renderSettings(tc){
-  tc.innerHTML=`
-    <h3 style="font-size:15px;font-weight:700;margin-bottom:8px;color:#1e40af">⚙️ 1. 員工薪資名冊管理</h3>
-    <div class="grid" id="settings-emp-grid" style="margin-bottom:20px"></div>
-    
-    <h3 style="font-size:15px;font-weight:700;margin-bottom:8px;color:#ea580c">⚙️ 2. 機具設備清冊管理</h3>
-    <div class="grid" id="settings-mach-grid"></div>
-    <button class="btn btn-primary" id="add-new-mach-btn" style="margin-top:10px;width:100%">＋ 新增機械機具項目</button>
-    
-    <button class="btn btn-secondary" id="add-new-emp-btn" style="margin-top:20px;width:100%;background:#e2e8f0">＋ 新增員工</button>
-  `;
-  
-  const eGrid=document.getElementById('settings-emp-grid');
-  employees.forEach(emp=>{
-    const div=document.createElement('div');div.className='card';
-    if(state.editEmp && state.editEmp.id===emp.id){
-      div.innerHTML=`
-        <div class="edit-form">
-          <input type="text" id="edit-name" value="${state.editEmp.name}"/>
-          <div class="bonus-row"><label>日薪 $</label><input type="number" id="edit-wage" value="${state.editEmp.dailyWage}"/></div>
-          <div class="btn-row">
-            <button class="btn btn-primary" id="save-emp">儲存</button>
-            <button class="btn btn-secondary" id="cancel-emp">取消</button>
-          </div>
-        </div>`;
-      div.querySelector('#save-emp').onclick=()=>{
-        const name=document.getElementById('edit-name').value.trim();
-        const wage=parseInt(document.getElementById('edit-wage').value)||0;
-        if(!name)return;
-        employees=employees.map(e=>e.id===emp.id?{...e,name,dailyWage:wage}:e);
-        save();setState({editEmp:null});
-      };
-      div.querySelector('#cancel-emp').onclick=()=>setState({editEmp:null});
-    } else {
-      div.innerHTML=`
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <div><div class="emp-name">${emp.name}</div><div class="emp-wage" style="margin-top:2px">日薪 NT$ ${emp.dailyWage.toLocaleString()}</div></div>
-          <button class="btn btn-secondary" style="padding:4px 12px" id="edit-emp-${emp.id}">編輯</button>
-        </div>`;
-      div.querySelector(`#edit-emp-${emp.id}`).onclick=()=>setState({editEmp:{...emp}});
     }
-    eGrid.appendChild(div);
-  });
 
-  const mGrid=document.getElementById('settings-mach-grid');
-  machines.forEach(mach=>{
-    const div=document.createElement('div');div.className='card';
-    if(state.editMach && state.editMach.id===mach.id){
-      div.innerHTML=`
-        <div class="edit-form">
-          <input type="text" id="edit-mname" value="${state.editMach.name}"/>
-          <div class="bonus-row"><label>每日成本 $</label><input type="number" id="edit-mcost" value="${state.editMach.dailyCost}"/></div>
-          <div class="btn-row">
-            <button class="btn btn-primary" id="save-mach">儲存</button>
-            <button class="btn btn-secondary" id="cancel-mach">取消</button>
-          </div>
-        </div>`;
-      div.querySelector('#save-mach').onclick=()=>{
-        const name=document.getElementById('edit-mname').value.trim();
-        const cost=parseInt(document.getElementById('edit-mcost').value)||0;
-        if(!name)return;
-        machines=machines.map(m=>m.id===mach.id?{...m,name,dailyCost:cost}:m);
-        save();setState({editMach:null});
-      };
-      div.querySelector('#cancel-mach').onclick=()=>setState({editMach:null});
-    } else {
-      div.innerHTML=`
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <div><div class="emp-name" style="color:#c2410c">${mach.name}</div><div class="emp-wage" style="margin-top:2px">每日進場 NT$ ${mach.dailyCost.toLocaleString()}</div></div>
-          <button class="btn btn-secondary" style="padding:4px 12px;background:#fff7ed" id="edit-mach-${mach.id}">編輯</button>
-        </div>`;
-      div.querySelector(`#edit-mach-${mach.id}`).onclick=()=>setState({editMach:{...mach}});
+    function toggleCostFields() {
+        const type = document.getElementById('cost-type').value;
+        if(type === 'machinery') {
+            document.getElementById('machinery-fields').classList.remove('hidden');
+            document.getElementById('material-fields').classList.add('hidden');
+        } else {
+            document.getElementById('machinery-fields').classList.add('hidden');
+            document.getElementById('material-fields').classList.remove('hidden');
+        }
     }
-    mGrid.appendChild(div);
-  });
 
-  document.getElementById('add-new-mach-btn').onclick=()=>{
-    const name = prompt('請輸入新機械機具名稱：');
-    if(!name) return;
-    const cost = parseInt(prompt('請輸入每日進場成本金額(元)：')) || 0;
-    machines.push({id:Date.now(),name,dailyCost:cost});save();render();
-  };
-  document.getElementById('add-new-emp-btn').onclick=()=>{
-    const name = prompt('請輸入新員工姓名：');
-    if(!name) return;
-    const wage = parseInt(prompt('請輸入該員工預設日薪(元)：')) || 0;
-    employees.push({id:Date.now(),name,dailyWage:wage});save();render();
-  };
-}
+    function renderAttendanceList() {
+        const listContainer = document.getElementById('attendance-list');
+        listContainer.innerHTML = '';
+        workers.forEach(worker => {
+            const row = document.createElement('div');
+            row.className = 'attendance-row';
+            row.innerHTML = `
+                <span style="font-weight: 500;">${worker.name}</span>
+                <div class="status-options" data-worker-id="${worker.id}">
+                    <button class="status-btn active" data-status="出勤" onclick="setStatus(this)">出勤</button>
+                    <button class="status-btn" data-status="半天" onclick="setStatus(this)">半天</button>
+                    <button class="status-btn" data-status="請假" onclick="setStatus(this)">請假</button>
+                    <button class="status-btn" data-status="缺勤" onclick="setStatus(this)">缺勤</button>
+                </div>
+            `;
+            listContainer.appendChild(row);
+        });
+    }
 
-render();
+    function setStatus(btn) {
+        const parent = btn.parentElement;
+        parent.querySelectorAll('.status-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    }
+
+    function saveAttendance() {
+        const date = document.getElementById('attendance-date').value;
+        if(!date) return alert('請選擇日期');
+        const dayRecords = [];
+        document.querySelectorAll('.status-options').forEach(options => {
+            const workerId = parseInt(options.getAttribute('data-worker-id'));
+            const status = options.querySelector('.status-btn.active').getAttribute('data-status');
+            dayRecords.push({ workerId, status });
+        });
+        attendanceRecords[date] = dayRecords;
+        localStorage.setItem('proj_attendance', JSON.stringify(attendanceRecords));
+        alert(`${date} 出勤點名儲存成功！`);
+    }
+
+    function saveCostItem() {
+        const date = document.getElementById('cost-date').value;
+        const type = document.getElementById('cost-type').value;
+        if(!date) return alert('請選擇日期');
+
+        const uniqueId = Date.now();
+
+        if(type === 'machinery') {
+            const name = document.getElementById('machinery-name').value.trim();
+            const amount = parseFloat(document.getElementById('machinery-amount').value);
+            if(!name || isNaN(amount)) return alert('請完整輸入機具名稱與費用');
+            
+            machineryRecords.push({ id: uniqueId, date, name, amount });
+            localStorage.setItem('proj_machinery', JSON.stringify(machineryRecords));
+            document.getElementById('machinery-name').value = '';
+            document.getElementById('machinery-amount').value = '';
+        } else {
+            const name = document.getElementById('material-name').value.trim();
+            const amount = parseFloat(document.getElementById('material-amount').value);
+            if(!name || isNaN(amount)) return alert('請完整輸入材料品名與金額');
+
+            materialRecords.push({ id: uniqueId, date, name, amount });
+            localStorage.setItem('proj_materials', JSON.stringify(materialRecords));
+            document.getElementById('material-name').value = '';
+            document.getElementById('material-amount').value = '';
+        }
+        alert('成本項目儲存成功！');
+        renderCostDetails();
+    }
+
+    function renderCostDetails() {
+        const selectedDate = document.getElementById('cost-date').value;
+        const container = document.getElementById('daily-cost-detail-list');
+        container.innerHTML = '';
+
+        const dayMachinery = machineryRecords.filter(item => item.date === selectedDate);
+        const dayMaterial = materialRecords.filter(item => item.date === selectedDate);
+
+        if(dayMachinery.length === 0 && dayMaterial.length === 0) {
+            container.innerHTML = `<p style="color: #8e8e93; font-size: 13px; text-align: center; margin: 10px 0;">📅 ${selectedDate} 尚無任何成本登記紀錄。</p>`;
+            return;
+        }
+
+        dayMachinery.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'list-item';
+            div.innerHTML = `
+                <div>
+                    <span style="background:#e1f5fe; color:#0288d1; padding:2px 6px; border-radius:4px; font-size:11px; margin-right:6px;">機具</span>
+                    <span>${item.name}</span>
+                </div>
+                <div class="action-btns">
+                    <span style="font-weight:600; margin-right:6px;">$${item.amount.toLocaleString()}</span>
+                    <button class="btn-action btn-edit" onclick="editCostItem(${item.id}, 'machinery')">✏️ 編輯</button>
+                    <button class="btn-action btn-delete-item" onclick="deleteCostItem(${item.id}, 'machinery')">❌ 刪除</button>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+
+        dayMaterial.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'list-item';
+            div.innerHTML = `
+                <div>
+                    <span style="background:#efebe9; color:#5d4037; padding:2px 6px; border-radius:4px; font-size:11px; margin-right:6px;">材料</span>
+                    <span>${item.name}</span>
+                </div>
+                <div class="action-btns">
+                    <span style="font-weight:600; margin-right:6px;">$${item.amount.toLocaleString()}</span>
+                    <button class="btn-action btn-edit" onclick="editCostItem(${item.id}, 'material')">✏️ 編輯</button>
+                    <button class="btn-action btn-delete-item" onclick="deleteCostItem(${item.id}, 'material')">❌ 刪除</button>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    // 💥 新增：點擊編輯，資料彈回輸入框
+    function editCostItem(id, type) {
+        if(type === 'machinery') {
+            const item = machineryRecords.find(item => item.id === id);
+            if(!item) return;
+            
+            // 1. 自動切換下拉選單到「機具」並顯示對應欄位
+            document.getElementById('cost-type').value = 'machinery';
+            toggleCostFields();
+            
+            // 2. 將數值填回格子裡
+            document.getElementById('machinery-name').value = item.name;
+            document.getElementById('machinery-amount').value = item.amount;
+            
+            // 3. 從資料庫先濾除（等一下重新按儲存就會覆蓋進去）
+            machineryRecords = machineryRecords.filter(item => item.id !== id);
+            localStorage.setItem('proj_machinery', JSON.stringify(machineryRecords));
+        } else {
+            const item = materialRecords.find(item => item.id === id);
+            if(!item) return;
+
+            // 1. 自動切換下拉選單到「材料」並顯示對應欄位
+            document.getElementById('cost-type').value = 'material';
+            toggleCostFields();
+
+            // 2. 將數值填回格子裡
+            document.getElementById('material-name').value = item.name;
+            document.getElementById('material-amount').value = item.amount;
+
+            // 3. 從資料庫先濾除
+            materialRecords = materialRecords.filter(item => item.id !== id);
+            localStorage.setItem('proj_materials', JSON.stringify(materialRecords));
+        }
+        
+        // 4. 重刷下方清單，並提示使用者上移修改
+        renderCostDetails();
+        window.scrollTo({ top: 100, behavior: 'smooth' }); // 貼心手機小動畫：自動往上滾動到輸入區
+    }
+
+    function deleteCostItem(id, type) {
+        if(confirm('確定要刪除這筆開支紀錄嗎？')) {
+            if(type === 'machinery') {
+                machineryRecords = machineryRecords.filter(item => item.id !== id);
+                localStorage.setItem('proj_machinery', JSON.stringify(machineryRecords));
+            } else {
+                materialRecords = materialRecords.filter(item => item.id !== id);
+                localStorage.setItem('proj_materials', JSON.stringify(materialRecords));
+            }
+            renderCostDetails();
+        }
+    }
+
+    function generateReport() {
+        const start = document.getElementById('report-start').value;
+        const end = document.getElementById('report-end').value;
+        if(!start || !end) return alert('請選擇完整的報表區間');
+
+        let totalSalary = 0;
+        let totalMachinery = 0;
+        let totalMaterial = 0;
+
+        const workerEarnings = {};
+        workers.forEach(w => workerEarnings[w.id] = { name: w.name, base: w.dailyWage, total: 0, days: 0 });
+
+        for(let date in attendanceRecords) {
+            if(date >= start && date <= end) {
+                attendanceRecords[date].forEach(rec => {
+                    if(workerEarnings[rec.workerId]) {
+                        let multiplier = 0;
+                        if(rec.status === '出勤') { multiplier = 1; workerEarnings[rec.workerId].days += 1; }
+                        else if(rec.status === '半天') { multiplier = 0.5; workerEarnings[rec.workerId].days += 0.5; }
+                        
+                        workerEarnings[rec.workerId].total += (workerEarnings[rec.workerId].base * multiplier);
+                        totalSalary += (workerEarnings[rec.workerId].base * multiplier);
+                    }
+                });
+            }
+        }
+
+        machineryRecords.forEach(item => {
+            if(item.date >= start && item.date <= end) totalMachinery += item.amount;
+        });
+
+        materialRecords.forEach(item => {
+            if(item.date >= start && item.date <= end) totalMaterial += item.amount;
+        });
+
+        document.getElementById('lbl-total-salary').innerText = `NT$ ${totalSalary.toLocaleString()}`;
+        document.getElementById('lbl-total-machinery').innerText = `NT$ ${totalMachinery.toLocaleString()}`;
+        document.getElementById('lbl-total-material').innerText = `NT$ ${totalMaterial.toLocaleString()}`;
+
+        const maxBudget = Math.max(totalSalary, totalMachinery, totalMaterial, 1);
+        document.getElementById('bar-salary').style.width = `${(totalSalary / maxBudget) * 100}%`;
+        document.getElementById('bar-machinery').style.width = `${(totalMachinery / maxBudget) * 100}%`;
+        document.getElementById('bar-material').style.width = `${(totalMaterial / maxBudget) * 100}%`;
+
+        const detailContainer = document.getElementById('salary-detail-list');
+        detailContainer.innerHTML = '';
+        for(let id in workerEarnings) {
+            const div = document.createElement('div');
+            div.className = 'list-item';
+            div.innerHTML = `
+                <span><strong>${workerEarnings[id].name}</strong> (累計出勤 ${workerEarnings[id].days} 天)</span>
+                <span style="color:var(--success-color); font-weight:bold;">NT$ ${workerEarnings[id].total.toLocaleString()}</span>
+            `;
+            detailContainer.appendChild(div);
+        }
+    }
+
+    function renderAdminWorkerList() {
+        const container = document.getElementById('admin-worker-list');
+        container.innerHTML = '<h3>目前名冊</h3>';
+        workers.forEach(w => {
+            const div = document.createElement('div');
+            div.className = 'list-item';
+            div.style.alignItems = 'center';
+            div.innerHTML = `
+                <span>${w.name} (日薪: ${w.dailyWage}元)</span>
+                <button class="status-btn" data-status="缺勤" style="padding:4px 8px;" onclick="deleteWorker(${w.id})">刪除</button>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    function addWorker() {
+        const name = document.getElementById('new-worker-name').value.trim();
+        const wage = parseFloat(document.getElementById('new-worker-wage').value);
+        if(!name || isNaN(wage)) return alert('請輸入完整的員工姓名與薪資');
+
+        const newWorker = { id: Date.now(), name, dailyWage: wage };
+        workers.push(newWorker);
+        localStorage.setItem('proj_workers', JSON.stringify(workers));
+        
+        document.getElementById('new-worker-name').value = '';
+        document.getElementById('new-worker-wage').value = '';
+        
+        renderAdminWorkerList();
+        renderAttendanceList();
+        alert('員工新增成功！');
+    }
+
+    function deleteWorker(id) {
+        if(confirm('確定要刪除該員工嗎？這不會刪除過去的歷史出勤紀錄。')) {
+            workers = workers.filter(w => w.id !== id);
+            localStorage.setItem('proj_workers', JSON.stringify(workers));
+            renderAdminWorkerList();
+            renderAttendanceList();
+        }
+    }
+
+    function clearAllData() {
+        if(confirm('⚠️ 警告：這將會永久刪除手機內所有的工程出勤、機具、材料歷史資料，確定要清除嗎？')) {
+            localStorage.clear();
+            alert('所有資料已成功清空，系統即將重新載入。');
+            window.location.reload();
+        }
+    }
 </script>
+
 </body>
 </html>
