@@ -77,7 +77,7 @@ select,input[type=date],input[type=number],input[type=text],textarea{padding:6px
 /* 成本專用樣式 */
 .cost-box {background:#fff7ed;border:1px dashed #fed7aa;border-radius:8px;padding:10px;margin-top:10px}
 .cost-title {font-size:13px;font-weight:700;color:#c2410c;margin-bottom:6px}
-.cost-item-detail {font-size:12px;color:#7c2d12;display:flex;justify-content:between;margin-bottom:2px}
+.cost-item-detail {font-size:12px;color:#7c2d12;display:flex;justify-content:space-between;margin-bottom:2px}
 .cost-total-row {border-top:1px solid #fed7aa;padding-top:4px;margin-top:4px;font-weight:700;color:#9a3412;display:flex;justify-content:space-between}
 .dynamic-row {display:flex;gap:6px;margin-bottom:6px}
 .dynamic-row input[type=text] {flex:2}
@@ -128,7 +128,7 @@ function getDays(y,m){return new Date(y,m,0).getDate()}
 function periodDates(y,m,h){
   const s=h===1?1:16,e=h===1?15:getDays(y,m);
   const r=[];
-  for(let d=s;d<=e;d++)r.push(`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`);
+  for(let d=s; d<=e; d++)r.push(`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`);
   return r;
 }
 function nowPeriod(){
@@ -142,7 +142,6 @@ function setRecord(date,eid,field,val){
   records[date][eid][field]=val;save();
 }
 
-// 核心計算：計算某位員工在某天因出勤產生的實際薪資
 function getEmpWageOnDay(date,eid){
   const emp=employees.find(e=>e.id===eid);
   if(!emp)return 0;
@@ -163,7 +162,7 @@ let state={
   editMach:null,
   showAddProject:false,
   viewProject:null,
-  newProject:{name:'',desc:'',members:[],machines:[],materials:[]}, // materials: [{name, cost}]
+  newProject:{name:'',desc:'',members:[],machines:[],materials:[]}, 
 };
 
 function setState(patch){Object.assign(state,patch);render()}
@@ -225,7 +224,7 @@ function renderAttendance(tc){
       const next=STATUS_ORDER[(idx+1)%STATUS_ORDER.length];
       setRecord(state.selectedDate,emp.id,'status',next);render();
     };
-    div.querySelector('.bonus-input').onchange=e=>{
+    div.querySelector('.bonus-input').onchange=e=> {
       setRecord(state.selectedDate,emp.id,'bonus',Number(e.target.value));
     };
     grid.appendChild(div);
@@ -297,7 +296,6 @@ function renderSite(tc){
       </div>
     </div>`;
 
-    // 綁定事件
     document.getElementById('proj-name').oninput=e=>state.newProject.name=e.target.value;
     document.getElementById('proj-desc').oninput=e=>state.newProject.desc=e.target.value;
     
@@ -321,10 +319,10 @@ function renderSite(tc){
     };
 
     document.querySelectorAll('.mat-name').forEach(input=>{
-      input.onchange=e=>{state.newProject.materials[e.target.dataset.idx].name=e.target.value};
+      input.oninput=e=>{state.newProject.materials[e.target.dataset.idx].name=e.target.value};
     });
     document.querySelectorAll('.mat-cost').forEach(input=>{
-      input.onchange=e=>{state.newProject.materials[e.target.dataset.idx].cost=Number(e.target.value)||0};
+      input.oninput=e=>{state.newProject.materials[e.target.dataset.idx].cost=Number(e.target.value)||0};
     });
     document.querySelectorAll('.del-mat-btn').forEach(btn=>{
       btn.onclick=()=>{
@@ -343,7 +341,7 @@ function renderSite(tc){
         desc:document.getElementById('proj-desc').value,
         members:[...state.newProject.members],
         machines:[...state.newProject.machines],
-        materials:[...state.newProject.materials.filter(m=>m.name)]
+        materials:state.newProject.materials.filter(m=>m.name.trim()!=='').map(m=>({...m}))
       });
       save();
       setState({showAddProject:false,newProject:{name:'',desc:'',members:[],machines:[],materials:[]}});
@@ -357,23 +355,23 @@ function renderSite(tc){
   dayProjects.forEach((proj,pIdx)=>{
     const div=document.createElement('div');div.className='project-card';
     
-    // 計算該項目各項成本
     let empTotal=0, machTotal=0, matTotal=0;
     
     const empDetails=proj.members.map(id=>{
       const e=employees.find(x=>x.id===id);
       const cost=getEmpWageOnDay(state.selectedDate,id);
       empTotal+=cost;
-      return e?`<div class="cost-item-detail"><span>▪️ ${e.name} (薪資)</span><span>$${cost.toLocaleString()}</span></div>`:''
+      return e?`<div class="cost-item-detail"><span>▪️ ${e.name} (人員)</span><span>$${cost.toLocaleString()}</span></div>`:''
     }).join('');
 
     const machDetails=proj.machines.map(id=>{
       const m=machines.find(x=>x.id===id);
       if(m){machTotal+=m.dailyCost;}
-      return m?`<div class="cost-item-detail"><span>▪️ ${m.name} (租借)</span><span>$${m.dailyCost.toLocaleString()}</span></div>`:''
+      return m?`<div class="cost-item-detail"><span>▪️ ${m.name} (機械)</span><span>$${m.dailyCost.toLocaleString()}</span></div>`:''
     }).join('');
 
-    const matDetails=proj.materials.map(m=>{
+    // ✨ 修正點：在這裡將每筆耗材的名稱與金額印到畫面上
+    const matDetails=(proj.materials||[]).map(m=>{
       matTotal+=m.cost;
       return `<div class="cost-item-detail"><span>▪️ ${m.name} (耗材)</span><span>$${m.cost.toLocaleString()}</span></div>`
     }).join('');
@@ -524,7 +522,6 @@ function renderSettings(tc){
     <button class="btn btn-secondary" id="add-new-emp-btn" style="margin-top:20px;width:100%;background:#e2e8f0">＋ 新增員工</button>
   `;
   
-  // 1. 渲染員工設定
   const eGrid=document.getElementById('settings-emp-grid');
   employees.forEach(emp=>{
     const div=document.createElement('div');div.className='card';
@@ -557,7 +554,6 @@ function renderSettings(tc){
     eGrid.appendChild(div);
   });
 
-  // 2. 渲染機械設定
   const mGrid=document.getElementById('settings-mach-grid');
   machines.forEach(mach=>{
     const div=document.createElement('div');div.className='card';
@@ -590,7 +586,6 @@ function renderSettings(tc){
     mGrid.appendChild(div);
   });
 
-  // 新增按鈕綁定
   document.getElementById('add-new-mach-btn').onclick=()=>{
     const name = prompt('請輸入新機械機具名稱：');
     if(!name) return;
