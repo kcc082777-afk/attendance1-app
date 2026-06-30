@@ -139,6 +139,22 @@
         .status-btn.active[data-status="請假"] { background: #8e8e93; color: #fff; border-color: #8e8e93; }
         .status-btn.active[data-status="缺勤"] { background: var(--danger-color); color: #fff; border-color: var(--danger-color); }
 
+        /* 總成本大看板樣式 */
+        .total-summary-box {
+            background: #1c1c1e;
+            color: #fff;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+        .total-summary-box .amount {
+            font-size: 26px;
+            font-weight: 700;
+            color: #ff9500;
+            margin-top: 6px;
+        }
+
         .chart-container {
             width: 100%;
             box-sizing: border-box;
@@ -171,10 +187,38 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 0;
+            padding: 12px 0;
             font-size: 14px;
             border-bottom: 1px solid #eee;
         }
+        .worker-report-card {
+            border-bottom: 1px solid #eee;
+            padding: 12px 0;
+        }
+        .worker-report-main {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 600;
+            font-size: 15px;
+            margin-bottom: 6px;
+        }
+        .worker-report-details {
+            font-size: 12px;
+            color: #8e8e93;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .badge {
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #fff;
+        }
+        .badge-work { background-color: var(--success-color); }
+        .badge-half { background-color: var(--warning-color); }
+        .badge-leave { background-color: #8e8e93; }
+        .badge-absent { background-color: var(--danger-color); }
+
         .action-btns {
             display: flex;
             gap: 6px;
@@ -188,22 +232,10 @@
             cursor: pointer;
             box-sizing: border-box;
         }
-        .btn-edit {
-            border: 1px solid var(--primary-color);
-            color: var(--primary-color);
-        }
-        .btn-edit:active {
-            background: var(--primary-color);
-            color: #fff;
-        }
-        .btn-delete-item {
-            border: 1px solid var(--danger-color);
-            color: var(--danger-color);
-        }
-        .btn-delete-item:active {
-            background: var(--danger-color);
-            color: #fff;
-        }
+        .btn-edit { border: 1px solid var(--primary-color); color: var(--primary-color); }
+        .btn-edit:active { background: var(--primary-color); color: #fff; }
+        .btn-delete-item { border: 1px solid var(--danger-color); color: var(--danger-color); }
+        .btn-delete-item:active { background: var(--danger-color); color: #fff; }
         .hidden { display: none !important; }
     </style>
 </head>
@@ -295,11 +327,16 @@
             <button class="btn" onclick="generateReport()">生成結算報表</button>
         </div>
 
+        <div class="total-summary-box">
+            <div>🏗️ 本期總成本開支 (薪資+機具+材料)</div>
+            <div class="amount" id="lbl-grand-total">NT$ 0</div>
+        </div>
+
         <div class="card">
             <h2>📈 本期開支佔比</h2>
             <div class="chart-container">
                 <div class="chart-bar-wrapper">
-                    <div class="chart-label"><span id="lbl-total-salary-name">員工薪資總計</span><span id="lbl-total-salary">NT$ 0</span></div>
+                    <div class="chart-label"><span>員工薪資總計</span><span id="lbl-total-salary">NT$ 0</span></div>
                     <div class="chart-bar-bg"><div id="bar-salary" class="chart-bar-fill"></div></div>
                 </div>
                 <div class="chart-bar-wrapper">
@@ -314,7 +351,7 @@
         </div>
 
         <div class="card">
-            <h2>📋 員工薪資發放明細</h2>
+            <h2>📋 員工出勤與薪資結算明細</h2>
             <div id="salary-detail-list">
                 <p style="color: #8e8e93; font-size: 14px; text-align: center;">請選擇日期區間並點擊生成報表</p>
             </div>
@@ -459,6 +496,7 @@
         renderCostDetails();
     }
 
+    // 渲染當日成本明細
     function renderCostDetails() {
         const selectedDate = document.getElementById('cost-date').value;
         const container = document.getElementById('daily-cost-detail-list');
@@ -507,43 +545,28 @@
         });
     }
 
-    // 💥 新增：點擊編輯，資料彈回輸入框
     function editCostItem(id, type) {
         if(type === 'machinery') {
             const item = machineryRecords.find(item => item.id === id);
             if(!item) return;
-            
-            // 1. 自動切換下拉選單到「機具」並顯示對應欄位
             document.getElementById('cost-type').value = 'machinery';
             toggleCostFields();
-            
-            // 2. 將數值填回格子裡
             document.getElementById('machinery-name').value = item.name;
             document.getElementById('machinery-amount').value = item.amount;
-            
-            // 3. 從資料庫先濾除（等一下重新按儲存就會覆蓋進去）
             machineryRecords = machineryRecords.filter(item => item.id !== id);
             localStorage.setItem('proj_machinery', JSON.stringify(machineryRecords));
         } else {
             const item = materialRecords.find(item => item.id === id);
             if(!item) return;
-
-            // 1. 自動切換下拉選單到「材料」並顯示對應欄位
             document.getElementById('cost-type').value = 'material';
             toggleCostFields();
-
-            // 2. 將數值填回格子裡
             document.getElementById('material-name').value = item.name;
             document.getElementById('material-amount').value = item.amount;
-
-            // 3. 從資料庫先濾除
             materialRecords = materialRecords.filter(item => item.id !== id);
             localStorage.setItem('proj_materials', JSON.stringify(materialRecords));
         }
-        
-        // 4. 重刷下方清單，並提示使用者上移修改
         renderCostDetails();
-        window.scrollTo({ top: 100, behavior: 'smooth' }); // 貼心手機小動畫：自動往上滾動到輸入區
+        window.scrollTo({ top: 100, behavior: 'smooth' });
     }
 
     function deleteCostItem(id, type) {
@@ -559,6 +582,7 @@
         }
     }
 
+    // 💥 核心升級：結算報表生成（含總金額加總與個人出勤細節統計）
     function generateReport() {
         const start = document.getElementById('report-start').value;
         const end = document.getElementById('report-end').value;
@@ -568,103 +592,12 @@
         let totalMachinery = 0;
         let totalMaterial = 0;
 
+        // 初始化員工報表物件，擴充統計各狀態天數
         const workerEarnings = {};
-        workers.forEach(w => workerEarnings[w.id] = { name: w.name, base: w.dailyWage, total: 0, days: 0 });
-
-        for(let date in attendanceRecords) {
-            if(date >= start && date <= end) {
-                attendanceRecords[date].forEach(rec => {
-                    if(workerEarnings[rec.workerId]) {
-                        let multiplier = 0;
-                        if(rec.status === '出勤') { multiplier = 1; workerEarnings[rec.workerId].days += 1; }
-                        else if(rec.status === '半天') { multiplier = 0.5; workerEarnings[rec.workerId].days += 0.5; }
-                        
-                        workerEarnings[rec.workerId].total += (workerEarnings[rec.workerId].base * multiplier);
-                        totalSalary += (workerEarnings[rec.workerId].base * multiplier);
-                    }
-                });
-            }
-        }
-
-        machineryRecords.forEach(item => {
-            if(item.date >= start && item.date <= end) totalMachinery += item.amount;
-        });
-
-        materialRecords.forEach(item => {
-            if(item.date >= start && item.date <= end) totalMaterial += item.amount;
-        });
-
-        document.getElementById('lbl-total-salary').innerText = `NT$ ${totalSalary.toLocaleString()}`;
-        document.getElementById('lbl-total-machinery').innerText = `NT$ ${totalMachinery.toLocaleString()}`;
-        document.getElementById('lbl-total-material').innerText = `NT$ ${totalMaterial.toLocaleString()}`;
-
-        const maxBudget = Math.max(totalSalary, totalMachinery, totalMaterial, 1);
-        document.getElementById('bar-salary').style.width = `${(totalSalary / maxBudget) * 100}%`;
-        document.getElementById('bar-machinery').style.width = `${(totalMachinery / maxBudget) * 100}%`;
-        document.getElementById('bar-material').style.width = `${(totalMaterial / maxBudget) * 100}%`;
-
-        const detailContainer = document.getElementById('salary-detail-list');
-        detailContainer.innerHTML = '';
-        for(let id in workerEarnings) {
-            const div = document.createElement('div');
-            div.className = 'list-item';
-            div.innerHTML = `
-                <span><strong>${workerEarnings[id].name}</strong> (累計出勤 ${workerEarnings[id].days} 天)</span>
-                <span style="color:var(--success-color); font-weight:bold;">NT$ ${workerEarnings[id].total.toLocaleString()}</span>
-            `;
-            detailContainer.appendChild(div);
-        }
-    }
-
-    function renderAdminWorkerList() {
-        const container = document.getElementById('admin-worker-list');
-        container.innerHTML = '<h3>目前名冊</h3>';
         workers.forEach(w => {
-            const div = document.createElement('div');
-            div.className = 'list-item';
-            div.style.alignItems = 'center';
-            div.innerHTML = `
-                <span>${w.name} (日薪: ${w.dailyWage}元)</span>
-                <button class="status-btn" data-status="缺勤" style="padding:4px 8px;" onclick="deleteWorker(${w.id})">刪除</button>
-            `;
-            container.appendChild(div);
-        });
-    }
-
-    function addWorker() {
-        const name = document.getElementById('new-worker-name').value.trim();
-        const wage = parseFloat(document.getElementById('new-worker-wage').value);
-        if(!name || isNaN(wage)) return alert('請輸入完整的員工姓名與薪資');
-
-        const newWorker = { id: Date.now(), name, dailyWage: wage };
-        workers.push(newWorker);
-        localStorage.setItem('proj_workers', JSON.stringify(workers));
-        
-        document.getElementById('new-worker-name').value = '';
-        document.getElementById('new-worker-wage').value = '';
-        
-        renderAdminWorkerList();
-        renderAttendanceList();
-        alert('員工新增成功！');
-    }
-
-    function deleteWorker(id) {
-        if(confirm('確定要刪除該員工嗎？這不會刪除過去的歷史出勤紀錄。')) {
-            workers = workers.filter(w => w.id !== id);
-            localStorage.setItem('proj_workers', JSON.stringify(workers));
-            renderAdminWorkerList();
-            renderAttendanceList();
-        }
-    }
-
-    function clearAllData() {
-        if(confirm('⚠️ 警告：這將會永久刪除手機內所有的工程出勤、機具、材料歷史資料，確定要清除嗎？')) {
-            localStorage.clear();
-            alert('所有資料已成功清空，系統即將重新載入。');
-            window.location.reload();
-        }
-    }
-</script>
-
-</body>
-</html>
+            workerEarnings[w.id] = { 
+                name: w.name, 
+                base: w.dailyWage, 
+                total: 0, 
+                days: 0,
+                detail: { work: 0, half: 0, leave:
